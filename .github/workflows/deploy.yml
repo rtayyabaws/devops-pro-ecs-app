@@ -1,0 +1,47 @@
+name: Build and Deploy to ECS
+
+on:
+  push:
+    brnaches:
+       - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: devops-pro-app
+  ECS_CLUSTER: devops-pro-cluster
+  ECS_SERVICE: devops-pro-service
+  CONTAINER_NAME: app
+  TASK_DEFINITION_FAMILY: devops-pro-task
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      -name: Configure AWS credentials from GitHub OIDC
+       uses: aws-actions/configure-aws-credentials@v4
+       with:
+         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+         aws-region: ${{ env.AWS_REGION }}
+
+      -name: Login to Amazon ECR
+       id: login-ecr
+       uses: aws-actions/amazon-ecr-login@v2
+
+      -name: Build, tag, and push image
+       id: build-image
+       env:
+         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+         IMAGE_TAG: ${{ github.sha }}
+       run: |
+         aws ecs describe-task-definition \
+           --task-definition $TASK_DEFINITION_FAMILY \
+           --query taskDefinition > task-definition.json
+       
