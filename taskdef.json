@@ -4,8 +4,7 @@
   "containerDefinitions": [
     {
       "name": "app",
-      #"image": "205930609978.dkr.ecr.us-east-1.amazonaws.com/devops-pro-app:latest",
-      "image": "IMAGE_URI_PLACEHOLDER"
+      "image": "IMAGE_URI_PLACEHOLDER",
       "essential": true,
       "portMappings": [
         {
